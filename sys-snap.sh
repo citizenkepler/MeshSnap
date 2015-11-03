@@ -68,7 +68,8 @@ fi
 # Main()
 ################
 
-for ((;;)) ; do
+while true
+do
         # update time
         date=`date`
         hour=`date +%H`
