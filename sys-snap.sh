@@ -58,7 +58,7 @@ fi
 # if a system-snapshot directory exists, save the data and empty it.
 # if it does't, create it.  
 if [ -d ${ROOT_DIR}system-snapshot ]; then
-        tar -czf ${ROOT_DIR}system-snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}system-snapshot
+        tar -czqf ${ROOT_DIR}system-snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}system-snapshot
         rm -fr ${ROOT_DIR}system-snapshot/*
 else
 	mkdir ${ROOT_DIR}system-snapshot
@@ -90,6 +90,7 @@ do
         # basic stuff
         load=`cat /proc/loadavg` #least cpu
         echo "$date $hour $min --> load: $load" >> $LOG
+        udshape -k >> $LOG
         cat /proc/meminfo >> $LOG
         ps w >> $LOG
         netstat -anp >> $LOG
