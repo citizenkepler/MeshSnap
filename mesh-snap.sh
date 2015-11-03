@@ -58,7 +58,7 @@ fi
 # if a system-snapshot directory exists, save the data and empty it.
 # if it does't, create it.  
 if [ -d ${ROOT_DIR}system-snapshot ]; then
-        tar -czqf ${ROOT_DIR}system-snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}system-snapshot
+        tar -czf ${ROOT_DIR}system-snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}system-snapshot &> /dev/null
         rm -fr ${ROOT_DIR}system-snapshot/*
 else
 	mkdir ${ROOT_DIR}system-snapshot
