@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
-# SysSnap is a very simple system monitoring script.
+# MeshSnap is a very simple system monitoring script.
 ########################################################################
-#    Copyright (C) 2012
+#    Copyright (C) 2015
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,21 +25,11 @@
 ##############
 
 # Set the time between snapshots for formating see: man sleep
-SLEEP_TIME="1m"
+SLEEP_TIME="5m"
 
 # The base directory under which to build the directory where snapshots are stored.
 # You *MUST* put a slash at the end.
-ROOT_DIR="~/"
-
-# Sometimes you won't have mysql and/or you won't have the root password to put in a .my.cnf file
-# if that's the case, set this to "" (0 evals true in bash)
-MYSQL=1
-# If the server has lighttpd or some other webserver, set this to ""
-APACHE=1
-# If the server has cpanel set this to 1
-CPANEL=1
-# If you want extended data, set this to 1
-MAX_DATA=""
+ROOT_DIR="/tmp/"
 
 ################################################################################
 #  If you don't know what your doing, don't change anything below this line
@@ -62,10 +52,7 @@ date=`date +%Y%m%d`
 hour=`date +%H`
 min=`date +%M`
 
-# Expand ~ characters
-T1=$(echo sa\~a${HOME}a)
-T2=$(echo $ROOT_DIR | sed -e $T1)
-ROOT_DIR=$T2
+# Verify Root Dir
 
 if [ ! -d ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not a directory
@@ -111,24 +98,9 @@ for ((;;)) ; do
         load=`cat /proc/loadavg` #least cpu
         echo "$date $hour $min --> load: $load" >> $LOG
         cat /proc/meminfo >> $LOG
-        vmstat 1 10 >> $LOG
-        ps auwwxf >> $LOG
+        ps w >> $LOG
         netstat -anp >> $LOG
 
-        # optional logging
-        if [ $MYSQL ]; then
-                mysqladmin proc  >> $LOG
-        fi
-        if [ $CPANEL ] ; then
-                lynx --dump localhost/whm-server-status  >> $LOG
-        else if [ $APACHE ]; then
-                lynx -width=1024 -dump http://localhost/server-status|egrep '(Client.+Request|GET|POST|HEAD)' >> $LOG
-             fi
-        fi
-        if [ $MAX_DATA ]; then
-                for i in `ps aux | grep nobody | awk '{print $2}'` ; do ls -al /proc/$i | grep cwd | grep home; done >> $LOG
-                lsof >> $LOG  #a lot more data, useful to track down random processes
-        fi
 
         # rotate the "current" pointer
         rm -rf ${ROOT_DIR}system-snapshot/current
