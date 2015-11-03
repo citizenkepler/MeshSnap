@@ -35,14 +35,6 @@ ROOT_DIR="/tmp/"
 #  If you don't know what your doing, don't change anything below this line
 ################################################################################
 
-#######################
-# Variable Conventions
-# --------------------
-# Variables that do not change in the main loop are in all caps.
-# Variables that do get updated in the main loop are in all lowercase.
-# Use underscores not dashes
-#######################
-
 ##########
 # Set Up
 ##########
@@ -53,7 +45,6 @@ hour=`date +%H`
 min=`date +%M`
 
 # Verify Root Dir
-
 if [ ! -d ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not a directory
         exit 1
@@ -86,7 +77,8 @@ for ((;;)) ; do
         # go to the next log file
         mkdir -p ${ROOT_DIR}system-snapshot/$hour
         current_interval=$hour/$min
-
+        
+        # Set the next logging file.
 	LOG=${ROOT_DIR}system-snapshot/$current_interval.log
 	
         # clear the log if it already exists
@@ -100,14 +92,15 @@ for ((;;)) ; do
         cat /proc/meminfo >> $LOG
         ps w >> $LOG
         netstat -anp >> $LOG
-
+	logread >> $LOG
+	dmesg >> $LOG
 
         # rotate the "current" pointer
         rm -rf ${ROOT_DIR}system-snapshot/current
         ln -s $LOG ${ROOT_DIR}system-snapshot/current
-
+	
+	# Sleep untill next report interval
         sleep $SLEEP_TIME
 
 done
 #EOF
-
