@@ -93,8 +93,8 @@ do
         cat /proc/meminfo >> $LOG
         ps w >> $LOG
         netstat -anp >> $LOG
-	logread >> $LOG
-	dmesg >> $LOG
+	logread | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
+	dmesg | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 
         # rotate the "current" pointer
         rm -rf ${ROOT_DIR}system-snapshot/current
