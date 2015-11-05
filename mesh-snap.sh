@@ -1,6 +1,6 @@
 #!/bin/bash
 ########################################################################
-# MeshSnap is a very simple system monitoring script.
+# Mesh-Snap is a very simple system monitoring script based off sys-snap
 ########################################################################
 #    Copyright (C) 2015
 #
@@ -31,6 +31,19 @@ SLEEP_TIME="5m"
 # You *MUST* put a slash at the end.
 ROOT_DIR="/tmp/"
 
+# Retain Logs localy
+# If this option is set to true, logs will be retained on the node itself
+# Otherwise logs will be purged to reduce memory ussage
+RETAIN_LOGS=false
+
+# FTP SETTINGS
+FTP_HOST=''
+FTP_PORT=''
+FTP_BASE_PATH='~/'
+
+# Configuration file for overriding defaults 
+CONFIG_FILE='/etc/mesh-snap.config'
+
 ################################################################################
 #  If you don't know what your doing, don't change anything below this line
 ################################################################################
@@ -44,6 +57,28 @@ date=`date +%Y%m%d`
 hour=`date +%H`
 min=`date +%M`
 
+# Check Configuration file
+if [[-e $CONFIG_FILE ]] ; then
+        echo "Reading Configuration: $CONFIG_FILE"
+        source $CONFIG_FILE
+fi
+
+# Get some basic infomation from the node itself 
+
+# Firmware Version
+FW_VER=$(cat /etc/fw_ng_version)
+
+# Node Name
+NODE=$(cat /etc/config/system | grep hostname | awk '{{print $3}}')
+
+# Network Name
+NETWORK=$(grep ssid1.gateway_name /tmp/config.txt | cut -d \  -f 2-20)
+
+########################
+# Script initalization 
+########################
+
+
 # Verify Root Dir
 if [ ! -d ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not a directory
@@ -54,6 +89,10 @@ if [ ! -w ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not writable
         exit 1
 fi
+
+
+
+# Below requires refactoring
 
 # if a system-snapshot directory exists, save the data and empty it.
 # if it does't, create it.  
@@ -101,6 +140,18 @@ do
         rm -rf ${ROOT_DIR}system-snapshot/current
         ln -s $LOG ${ROOT_DIR}system-snapshot/current
 	
+        #
+        # FTP UPLOAD HERE
+        #
+        #
+
+
+        #
+        #
+        # RETENTION ENFORCEMENT TO PERGE OLD LOGS AFTER UPLOAD 
+        #
+        #
+
 	# Sleep untill next report interval
         sleep $SLEEP_TIME
 
