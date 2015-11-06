@@ -94,18 +94,16 @@ fi
 # Script initalization 
 ########################
 
-
-
-
-
-# Below requires refactoring
-# if a system-snapshot directory exists, save the data and empty it.
-# if it does't, create it.  
+# Deal with logs stoored on the node itself.  
+# We will purge logs if retain logs is not set to true.
 
 if [[ "${RETAIN_LOGS}" ]] ; then
-
+        echo "Detected RETAIN_LOGS is se"
         if [[ -d ${ROOT_DIR} ]]; then
-                tar -czf ${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}*.log &> /dev/null
+                COMPRESS_TARBALL=${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz
+                echo "Exiting logs found, compressing to ${COMPRESS_TARBALL}"
+                tar -czf ${COMPRESS_TARBALL} ${ROOT_DIR}*.log &> /dev/null
+                echo "Purging logs from ${ROOT_DIR}"
                 rm -fr ${ROOT_DIR}*.log
         fi
 else
@@ -114,12 +112,16 @@ else
 fi
 
 
-# Verify Root Dir
+# Verify Root Dir is created, and create it if missing
+# Note: RETAIN_LOGS section may remove this directory 
+#       and depends on this to recreate that directory
 if [ ! -d ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not a directory, creating directory.
         mkdir -p ${ROOT_DIR}
 fi
 
+
+# Verify if the ROOT_DIR is writable.
 if [ ! -w ${ROOT_DIR} ] ; then
         echo $ROOT_DIR is not writable, script failing.
         exit 1
