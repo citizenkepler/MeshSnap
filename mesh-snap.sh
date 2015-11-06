@@ -94,28 +94,35 @@ fi
 # Script initalization 
 ########################
 
-# Verify Root Dir
-if [ ! -d ${ROOT_DIR} ] ; then
-        echo $ROOT_DIR is not a directory
-        exit 1
-fi
 
-if [ ! -w ${ROOT_DIR} ] ; then
-        echo $ROOT_DIR is not writable
-        exit 1
-fi
 
 
 
 # Below requires refactoring
-
 # if a system-snapshot directory exists, save the data and empty it.
 # if it does't, create it.  
-if [ -d ${ROOT_DIR}system-snapshot ]; then
-        tar -czf ${ROOT_DIR}system-snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}system-snapshot &> /dev/null
-        rm -fr ${ROOT_DIR}system-snapshot/*
+
+if [[ "${RETAIN_LOGS}" ]] ; then
+
+        if [[ -d ${ROOT_DIR} ]]; then
+                tar -czf ${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz ${ROOT_DIR}*.log &> /dev/null
+                rm -fr ${ROOT_DIR}*.log
+        fi
 else
-	mkdir ${ROOT_DIR}system-snapshot
+        echo "Removing ${ROOT_DIR} as RETAIN_LOGS is set to false"
+        rm -rf ${ROOT_DIR}
+fi
+
+
+# Verify Root Dir
+if [ ! -d ${ROOT_DIR} ] ; then
+        echo $ROOT_DIR is not a directory, creating directory.
+        mkdir -p ${ROOT_DIR}
+fi
+
+if [ ! -w ${ROOT_DIR} ] ; then
+        echo $ROOT_DIR is not writable, script failing.
+        exit 1
 fi
 
 ################
@@ -130,20 +137,11 @@ do
         min=`date +%M`
 
         # Rebuild file structure to Network-Node-YEAR-Month-Day-Hour-Minute.log
-        LOG=${ROOT_DIR}/
+        LOG=${ROOT_DIR}/${NETWORK}.${NODE}-${date}-${hour}:${min}
 
-
-        # go to the next log file
-        mkdir -p ${ROOT_DIR}system-snapshot/$hour
-        current_interval=$hour/$min
-        
-        # Set the next logging file.
-	LOG=${ROOT_DIR}system-snapshot/$current_interval.log
-
-
-	
         # clear the log if it already exists
         [ -e $LOG ] && rm $LOG
+
 
         # ### start actually logging ### #
 
