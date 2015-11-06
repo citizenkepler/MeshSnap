@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ########################################################################
 # Mesh-Snap is a very simple system monitoring script based off sys-snap
 ########################################################################
@@ -29,7 +30,7 @@ SLEEP_TIME="5m"
 
 # The base directory under which to build the directory where snapshots are stored.
 # You *MUST* put a slash at the end.
-ROOT_DIR="/tmp/"
+ROOT_DIR="/tmp/mesh-snap/"
 
 # Retain Logs localy
 # If this option is set to true, logs will be retained on the node itself
@@ -57,13 +58,9 @@ date=`date +%Y%m%d`
 hour=`date +%H`
 min=`date +%M`
 
-# Check Configuration file
-if [[-e $CONFIG_FILE ]] ; then
-        echo "Reading Configuration: $CONFIG_FILE"
-        source $CONFIG_FILE
-fi
 
 # Get some basic infomation from the node itself 
+
 
 # Firmware Version
 FW_VER=$(cat /etc/fw_ng_version)
@@ -74,10 +71,28 @@ NODE=$(cat /etc/config/system | grep hostname | awk '{{print $3}}')
 # Network Name
 NETWORK=$(grep ssid1.gateway_name /tmp/config.txt | cut -d \  -f 2-20)
 
+# The above methiod is bad and does not work correctly. 
+# This line despertaly needs updateing and would need to be re-worked before release. 
+# However it woreks currrently as a placeholder. 
+
+#UPDATE: I think we grab the Display name of the network with this command
+
+
+# Check Configuration file
+#   We support (kinda) re-asigning values of 
+
+if [[-e $CONFIG_FILE ]] ; then
+        echo "Reading Configuration: $CONFIG_FILE"
+        source $CONFIG_FILE
+        READ_CONFIG_FILE=true
+else
+        READ_CONFIG_FILE=false
+fi
+
+
 ########################
 # Script initalization 
 ########################
-
 
 # Verify Root Dir
 if [ ! -d ${ROOT_DIR} ] ; then
@@ -114,12 +129,18 @@ do
         hour=`date +%H`
         min=`date +%M`
 
+        # Rebuild file structure to Network-Node-YEAR-Month-Day-Hour-Minute.log
+        LOG=${ROOT_DIR}/
+
+
         # go to the next log file
         mkdir -p ${ROOT_DIR}system-snapshot/$hour
         current_interval=$hour/$min
         
         # Set the next logging file.
 	LOG=${ROOT_DIR}system-snapshot/$current_interval.log
+
+
 	
         # clear the log if it already exists
         [ -e $LOG ] && rm $LOG
@@ -130,6 +151,7 @@ do
         load=`cat /proc/loadavg` #least cpu
         echo "$date $hour $min --> load: $load" >> $LOG
         udshape -k >> $LOG
+        udshape -l >> $LOG
         cat /proc/meminfo >> $LOG
         ps w >> $LOG
         netstat -anp >> $LOG
@@ -144,6 +166,8 @@ do
         # FTP UPLOAD HERE
         #
         #
+        FTP_UPLOAD_FILE=$LOG
+        curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
 
 
         #
