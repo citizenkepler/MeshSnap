@@ -159,8 +159,8 @@ do
 	dmesg | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 
         # rotate the "current" pointer
-        rm -rf ${ROOT_DIR}system-snapshot/current
-        ln -s $LOG ${ROOT_DIR}system-snapshot/current
+        rm -rf ${ROOT_DIR}/current
+        ln -s $LOG ${ROOT_DIR}/current
 	
         #
         # FTP UPLOAD HERE
