@@ -53,20 +53,15 @@ CONFIG_FILE='/etc/mesh-snap.config'
 # Set Up
 ##########
 
-# Get the date, hour, and min for various tasks
-date=`date +%Y%m%d`
-hour=`date +%H`
-min=`date +%M`
-
-
 # Get some basic infomation from the node itself 
+#################################################
 
 
 # Firmware Version
 FW_VER=$(cat /etc/fw_ng_version)
 
 # Node Name
-NODE=$(cat /etc/config/system | grep hostname | awk '{{print $3}}')
+NODE=$(cat /etc/config/system | grep hostname | awk '{{print $3}}'|sed "s/'//g")
 
 # Network Name
 NETWORK=$(grep ssid1.gateway_name /tmp/config.txt | cut -d \  -f 2-20)
@@ -79,7 +74,7 @@ NETWORK=$(grep ssid1.gateway_name /tmp/config.txt | cut -d \  -f 2-20)
 
 
 # Check Configuration file
-#   We support (kinda) re-asigning values of 
+#   We support (kinda) re-asigning values of some things.
 
 if [[ -e $CONFIG_FILE ]] ; then
         echo "Reading Configuration: $CONFIG_FILE"
@@ -93,6 +88,10 @@ fi
 ########################
 # Script initalization 
 ########################
+
+# Get the date, hour, and min for various tasks
+set_datetime
+
 
 # Deal with logs stoored on the node itself.  
 # We will purge logs if retain logs is not set to true.
@@ -134,12 +133,10 @@ fi
 while true
 do
         # update time
-        date=`date`
-        hour=`date +%H`
-        min=`date +%M`
+        set_datetime
 
         # Rebuild file structure to Network-Node-YEAR-Month-Day-Hour-Minute.log
-        LOG=${ROOT_DIR}/${NETWORK}.${NODE}-${date}-${hour}:${min}
+        LOG=${ROOT_DIR}/${NETWORK}.${date}-${hour}:${min}-${NODE}
 
         # clear the log if it already exists
         [ -e $LOG ] && rm $LOG
@@ -181,3 +178,8 @@ do
 
 done
 #EOF
+set_datetime () { 
+        date=`date +%Y.%m-%d`
+        hour=`date +%H`
+        min=`date +%M`
+}
