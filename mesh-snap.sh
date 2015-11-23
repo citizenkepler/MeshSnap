@@ -156,19 +156,19 @@ do
 	dmesg | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 
         # rotate the "current" pointer
-        unlink ${ROOT_DIR}current
+        rm -rfv ${ROOT_DIR}current
         ln -s $LOG ${ROOT_DIR}current
 	
         #
         # FTP UPLOAD HERE
         #
-        #
+        # TODO
         #FTP_UPLOAD_FILE=$LOG
         #curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
 
 
         #
-        #
+        #  TODO
         # RETENTION ENFORCEMENT TO PERGE OLD LOGS AFTER UPLOAD 
         #
         #
