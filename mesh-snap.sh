@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ########################################################################
 # Mesh-Snap is a very simple system monitoring script based off sys-snap
@@ -159,8 +159,8 @@ do
 	dmesg | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 
         # rotate the "current" pointer
-        rm -rf ${ROOT_DIR}/current
-        ln -s $LOG ${ROOT_DIR}/current
+        unlink ${ROOT_DIR}current
+        ln -s $LOG ${ROOT_DIR}current
 	
         #
         # FTP UPLOAD HERE
