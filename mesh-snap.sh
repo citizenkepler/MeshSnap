@@ -81,7 +81,7 @@ NETWORK=$(grep ssid1.gateway_name /tmp/config.txt | cut -d \  -f 2-20)
 # Check Configuration file
 #   We support (kinda) re-asigning values of 
 
-if [[-e $CONFIG_FILE ]] ; then
+if [[ -e $CONFIG_FILE ]] ; then
         echo "Reading Configuration: $CONFIG_FILE"
         source $CONFIG_FILE
         READ_CONFIG_FILE=true
@@ -115,14 +115,14 @@ fi
 # Verify Root Dir is created, and create it if missing
 # Note: RETAIN_LOGS section may remove this directory 
 #       and depends on this to recreate that directory
-if [ ! -d ${ROOT_DIR} ] ; then
+if [[ ! -d ${ROOT_DIR} ]] ; then
         echo $ROOT_DIR is not a directory, creating directory.
         mkdir -p ${ROOT_DIR}
 fi
 
 
 # Verify if the ROOT_DIR is writable.
-if [ ! -w ${ROOT_DIR} ] ; then
+if [[ ! -w ${ROOT_DIR} ]] ; then
         echo $ROOT_DIR is not writable, script failing.
         exit 1
 fi
@@ -166,8 +166,8 @@ do
         # FTP UPLOAD HERE
         #
         #
-        FTP_UPLOAD_FILE=$LOG
-        curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
+        #FTP_UPLOAD_FILE=$LOG
+        #curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
 
 
         #
