@@ -100,7 +100,7 @@ if [[ "${RETAIN_LOGS}" ]] ; then
         echo "Detected RETAIN_LOGS is se"
         if [[ -d ${ROOT_DIR} ]]; then
                 COMPRESS_TARBALL=${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz
-                echo "Exiting logs found, compressing to ${COMPRESS_TARBALL}"
+                echo "Existing logs found, compressing to ${COMPRESS_TARBALL}"
                 tar -czf ${COMPRESS_TARBALL} ${ROOT_DIR}*.log &> /dev/null
                 echo "Purging logs from ${ROOT_DIR}"
                 rm -fr ${ROOT_DIR}*.log
@@ -177,7 +177,18 @@ do
         sleep $SLEEP_TIME
 
 done
-#EOF
+
+###############
+# End of script
+###############
+exit 0;
+
+
+
+###########
+# Functions
+###########
+
 set_datetime () { 
         date=`date +%Y.%m-%d`
         hour=`date +%H`
