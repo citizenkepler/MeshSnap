@@ -97,11 +97,13 @@ set_datetime
 # We will purge logs if retain logs is not set to true.
 
 if [[ "${RETAIN_LOGS}" ]] ; then
-        echo "Detected RETAIN_LOGS is se"
+        echo "Detected RETAIN_LOGS is set"
         if [[ -d ${ROOT_DIR} ]]; then
                 COMPRESS_TARBALL=${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz
                 echo "Existing logs found, compressing to ${COMPRESS_TARBALL}"
                 tar -czf ${COMPRESS_TARBALL} ${ROOT_DIR}*.log &> /dev/null
+                # TODO: Upolad compressed tarball 
+                # TODO: Purge compressed tarball
                 echo "Purging logs from ${ROOT_DIR}"
                 rm -fr ${ROOT_DIR}*.log
         fi
@@ -163,8 +165,8 @@ do
         # FTP UPLOAD HERE
         #
         # TODO
-        #FTP_UPLOAD_FILE=$LOG
-        #curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
+        FTP_UPLOAD_FILE=$LOG
+        echo curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
 
 
         #
