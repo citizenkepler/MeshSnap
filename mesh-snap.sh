@@ -102,8 +102,11 @@ if [[ "${RETAIN_LOGS}" ]] ; then
                 COMPRESS_TARBALL=${ROOT_DIR}snapshot.${date}.${hour}${min}.tar.gz
                 echo "Existing logs found, compressing to ${COMPRESS_TARBALL}"
                 tar -czf ${COMPRESS_TARBALL} ${ROOT_DIR}*.log &> /dev/null
-                # TODO: Upolad compressed tarball 
+                #
+                # TODO: Upload compressed tarball 
                 # TODO: Purge compressed tarball
+                # Note: Upload and Purge of compressed logs will not be supported in this scripts inital form
+                #
                 echo "Purging logs from ${ROOT_DIR}"
                 rm -fr ${ROOT_DIR}*.log
         fi
@@ -119,6 +122,11 @@ fi
 if [[ ! -d ${ROOT_DIR} ]] ; then
         echo $ROOT_DIR is not a directory, creating directory.
         mkdir -p ${ROOT_DIR}
+        if [[ $? == 1 ]] ; then
+        	echo "Can not create Logging Directory: ${ROOT_DIR}"
+        	echo "Can not contune, exiting!"
+        	exit 1
+        fi
 fi
 
 
@@ -128,13 +136,23 @@ if [[ ! -w ${ROOT_DIR} ]] ; then
         exit 1
 fi
 
+# Hook for custom scripting hooks
+if [ "$(declare -Ff mesh-snap-initalization)" == "mesh-snap-initalization" ]; then
+	mesh-snap-initalization;
+fi;
+
+
 ################
 # Main()
 ################
 
 while true
 do
-        # update time
+	########################
+	# Pre Data Collection #
+	########################
+
+        # Set currennt time
         set_datetime
 
         # Rebuild file structure to Network-Node-YEAR-Month-Day-Hour-Minute.log
@@ -142,11 +160,22 @@ do
 
         # clear the log if it already exists
         [ -e $LOG ] && rm $LOG
+        
+       	# Hook for custom scripting hooks
+	if [ "$(declare -Ff mesh-snap-pre-data-collection)" == "mesh-snap-pre-data-collection" ]; then
+		mesh-snap-pre-data-collection;
+	fi;
 
 
-        # ### start actually logging ### #
+	###################
+	# Data Collection #
+	###################
+	
+	# Hook for custom scripting hooks
+	if [ "$(declare -Ff mesh-snap-data-collection)" == "mesh-snap-data-collection" ]; then
+		mesh-snap-data-collection >> $LOG;
+	fi;
 
-        # basic stuff
         load=`cat /proc/loadavg` #least cpu
         echo "$date $hour $min --> load: $load" >> $LOG
         udshape -k >> $LOG
@@ -157,23 +186,27 @@ do
 	logread | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 	dmesg | grep -v 'ar9003_hw_set_power_per_rate_table' >> $LOG
 
+	########################
+	# Post Data Collection #
+	########################
+	
+	# Hook for custom scripting hooks
+	if [ "$(declare -Ff mesh-snap-post-data-collection)" == "mesh-snap-post-data-collection" ]; then
+		mesh-snap-post-data-collection;
+	fi;
+
         # rotate the "current" pointer
         rm -rfv ${ROOT_DIR}current
         ln -s $LOG ${ROOT_DIR}current
 	
-        #
-        # FTP UPLOAD HERE
-        #
-        # TODO
+        # FTP UPLOAD 
         FTP_UPLOAD_FILE=$LOG
         echo curl --upload-file $FTP_UPLOAD_FILE ftp://$FTP_HOST:$FTP_PORT/$FTP_UPLOAD_FILE
 
-
-        #
-        #  TODO
-        # RETENTION ENFORCEMENT TO PERGE OLD LOGS AFTER UPLOAD 
-        #
-        #
+	# Retention Enforcement
+        if [[ ! "${RETAIN_LOGS}" ]] ; then
+        	rm "${LOG}"
+        fi
 
 	# Sleep untill next report interval
         sleep $SLEEP_TIME
