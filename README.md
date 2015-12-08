@@ -19,6 +19,8 @@ curl -sLk https://raw.githubusercontent.com/citizenkepler/MeshSnap/Initial-Conve
 
 curl -k -o /tmp/mesh-snap.sh https://raw.githubusercontent.com/citizenkepler/MeshSnap/Initial-Conversion-for-Mesh/mesh-snap.sh
 
+sh <(curl -sLk https://raw.githubusercontent.com/citizenkepler/MeshSnap/Initial-Conversion-for-Mesh/mesh-snap.sh)
+
 To stop sys-snap.pl, kill the process:
     ps aux | awk '/[s]ys-snap/ {print$2}' | xargs kill
 
